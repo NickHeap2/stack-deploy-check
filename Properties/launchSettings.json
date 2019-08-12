@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "stack-deploy-check": {
+      "commandName": "Project",
+      "commandLineArgs": "vsts"
+    }
+  }
+}
