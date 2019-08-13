@@ -10,20 +10,30 @@ namespace StackDeployCheck
         {
             if (args.Length < 1)
             {
-                Console.Error.WriteLine("dotnet stack-deploy-check {stackName} [waitTimeout]");
-                return -1;
+                Console.Error.WriteLine("dotnet stack-deploy-check {stackName} [timeout seconds] [stableTime seconds]");
+                return -2;
             }
 
             var stackName = args[0];
             int timeout = 10000;
+            int stableTime = 10000;
             if (args.Length > 1)
             {
                 if (!int.TryParse(args[1], out timeout))
                 {
                     Console.Error.WriteLine("ERROR: Invalid timeout!");
-                    return -2;
+                    return -3;
                 }
                 timeout = timeout * 1000;
+            }
+            if (args.Length > 2)
+            {
+                if (!int.TryParse(args[2], out stableTime))
+                {
+                    Console.Error.WriteLine("ERROR: Invalid stableTime!");
+                    return -3;
+                }
+                stableTime = stableTime * 1000;
             }
 
             Timer timer = new Timer(timeout);
@@ -34,8 +44,15 @@ namespace StackDeployCheck
             {
                 StackName = stackName
             };
-            stackChecker.AwaitDesiredStates();
-            Console.Out.WriteLine("All stack tasks are running");
+            if (stackChecker.AwaitDesiredStates2(stableTime))
+            {
+                Console.Out.WriteLine("All stack tasks are running.");
+            }
+            else
+            {
+                Console.Error.WriteLine("ERROR: Not all stack tasks completed successfully.");
+                return -1;
+            }
 
             return 0;
         }
